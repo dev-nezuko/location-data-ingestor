@@ -1,0 +1,19 @@
+# Database
+db.sqlite3
+
+# Media and static files
+media/
+staticfiles/
+
+# Virtual environment
+env
+
+
+
+# celery
+celerybeat-schedule.*
+
+
+
+
+
