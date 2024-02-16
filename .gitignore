@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+coverage/
+
+# Virtual environments
+.venv/
+venv/
+env/
+project_venv/
+node_modules/
+
+# Local databases and generated files
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+build/
+dist/
+*.egg-info/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs and scratch
+*.log
+logs/
+tmp/
+.DS_Store
+
+# Not part of this repository
+.github/
