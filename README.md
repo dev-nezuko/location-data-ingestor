@@ -102,6 +102,9 @@ After completing the task, please share the project via a git repository. The re
 
    Visit http://localhost:8000/admin/ in your web browser.
 
+### Looks Like
+ <img width="1619" alt="image" src="https://github.com/dev-nezuko/location-data-ingestor/assets/119432487/d7c79baa-166b-4d89-8267-7a69c755aa78">
+
 ## Contributing
 
 Contributions to the project are welcome! If you'd like to contribute, please follow the guidelines outlined in the CONTRIBUTING.md file.
