@@ -1,0 +1,23 @@
+[
+  {
+    "id": "hv-201",
+    "name": "Kestrel Hill Lookout",
+    "category": "viewpoint",
+    "coordinates": {"latitude": -41.2955, "longitude": 174.7702},
+    "ratings": [5, 5, 4]
+  },
+  {
+    "id": "hv-202",
+    "name": "Driftwood Climbing Wall",
+    "category": "sports-centre",
+    "coordinates": {"latitude": -41.2838, "longitude": 174.7751},
+    "ratings": [4, 3]
+  },
+  {
+    "id": "hv-203",
+    "name": "Copperbeech Community Garden",
+    "category": "park",
+    "coordinates": {"latitude": -41.2929, "longitude": 174.7688},
+    "ratings": [5, 4, 4, 4]
+  }
+]

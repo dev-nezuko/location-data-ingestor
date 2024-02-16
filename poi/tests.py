@@ -139,3 +139,32 @@ class ImportCommandOutputTests(TestCase):
                 '2 file(s) processed.',
             ],
         )
+
+
+class SampleFileTests(TestCase):
+    """The README's import examples use these files, so keep their counts honest."""
+
+    SAMPLES = Path(__file__).resolve().parent.parent / 'samples'
+
+    def test_samples_import_with_documented_counts(self):
+        output = StringIO()
+        with self.assertLogs('poi.tasks', 'WARNING') as logs:
+            call_command(
+                'import_poi',
+                *(str(self.SAMPLES / f'harbour-vale.{suffix}') for suffix in ('csv', 'json', 'xml')),
+                sync=True,
+                stdout=output,
+            )
+        self.assertEqual(
+            output.getvalue().splitlines()[:3],
+            [
+                'harbour-vale.csv: 4 imported, 2 skipped',
+                'harbour-vale.json: 3 imported, 0 skipped',
+                'harbour-vale.xml: 2 imported, 0 skipped',
+            ],
+        )
+        self.assertEqual(
+            logs.output,
+            ['WARNING:poi.tasks:Skipping invalid CSV line 5', 'WARNING:poi.tasks:Skipping invalid CSV line 7'],
+        )
+        self.assertEqual(PointOfInterest.objects.get(internal_id='hv-101').ratings, 4.5)

@@ -1,0 +1,7 @@
+poi_id,poi_name,poi_category,poi_latitude,poi_longitude,poi_ratings
+hv-101,Lantern Quay Coffee,cafe,-41.2871,174.7762,"{5,4,4,5}"
+hv-102,Saltmarsh Reading Room,library,-41.2893,174.7741,"{4,4,3}"
+hv-103,Gullwing Ferry Stop,ferry-terminal,-41.2850,174.7809,"{3,2,4,3}"
+hv-104,,bakery,-41.2902,174.7733,"{5}"
+hv-105,Old Ropeworks Market,market,-41.2917,174.7795,"{4,5,5}"
+hv-106,Tidewater Fish Bar,fast-food,-41.2866,174.7820,not-rated

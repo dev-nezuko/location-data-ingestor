@@ -1,0 +1,18 @@
+<PointsOfInterest>
+  <POI>
+    <pid>hv-301</pid>
+    <pname>Breakwater Tram Depot</pname>
+    <pcategory>museum</pcategory>
+    <platitude>-41.2881</platitude>
+    <plongitude>174.7837</plongitude>
+    <pratings>4,4,5</pratings>
+  </POI>
+  <POI>
+    <pid>hv-302</pid>
+    <pname>Netmaker's Lane Bus Stop</pname>
+    <pcategory>bus-stop</pcategory>
+    <platitude>-41.2908</platitude>
+    <plongitude>174.7760</plongitude>
+    <pratings>3,3,2</pratings>
+  </POI>
+</PointsOfInterest>
