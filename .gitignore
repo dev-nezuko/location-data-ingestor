@@ -9,11 +9,3 @@ staticfiles/
 env
 
 
-
-# celery
-celerybeat-schedule.*
-
-
-
-
-
