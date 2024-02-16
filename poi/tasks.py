@@ -1,11 +1,19 @@
+import csv
 import json
+import logging
 import math
-from django.db import transaction
 import xml.etree.ElementTree as ET
+
 from celery import shared_task
-import pandas as pd
 from django.core.exceptions import ValidationError
+from django.db import transaction
+
 from .models import PointOfInterest
+
+logger = logging.getLogger(__name__)
+
+CSV_FIELDS = ('poi_id', 'poi_name', 'poi_category', 'poi_latitude', 'poi_longitude', 'poi_ratings')
+
 
 def create_poi(**values):
     for field in ('latitude', 'longitude', 'ratings'):
@@ -21,54 +29,37 @@ def create_poi(**values):
     return point
 
 
+def average_csv_ratings(value):
+    if not value.startswith('{') or not value.endswith('}'):
+        raise ValueError('CSV ratings must be brace-delimited, e.g. {5,4,3}')
+    ratings = [float(rating) for rating in value[1:-1].split(',')]
+    return sum(ratings) / len(ratings)
+
+
 @shared_task
 def process_csv_chunk(file_path):
     """
-    Processes and imports data from a CSV file chunk into the PointOfInterest model.
+    Import a CSV file, skipping rows that fail parsing or model validation.
 
-    Args:
-        file_path (str): The path to the CSV file to process.
+    Blank cells stay empty strings, so model validation rejects them instead of
+    a missing name being stored as the text "nan".
     """
-    column_types = {
-        'poi_id': str,
-        'poi_name': str,
-        'poi_category': str,
-        'poi_latitude': str,
-        'poi_longitude': str,
-        'poi_ratings': str,
-    }
-    chunk_size = 1000
-
-    for chunk in pd.read_csv(file_path, dtype=column_types, chunksize=chunk_size):
-        for index, row in chunk.iterrows():
+    with open(file_path, newline='', encoding='utf-8-sig') as source:
+        reader = csv.DictReader(source)
+        for row in reader:
+            values = {field: (row.get(field) or '').strip() for field in CSV_FIELDS}
             try:
-                internal_id = int(row['poi_id'])
-                name = row['poi_name']
-                category = row['poi_category']
-                latitude = float(row['poi_latitude'])
-                longitude = float(row['poi_longitude'])
-
-                ratings_str = row['poi_ratings']
-                if not ratings_str.startswith('{') or not ratings_str.endswith('}'):
-                    raise ValueError(f'Invalid ratings format: {ratings_str}')
-
-                ratings = [float(rating.strip('{}')) for rating in ratings_str.split(',')]
-                average_rating = sum(ratings) / len(ratings)
-
                 create_poi(
-                    internal_id=internal_id,
-                    name=name,
-                    category=category,
-                    latitude=latitude,
-                    longitude=longitude,
-                    ratings=average_rating
+                    internal_id=values['poi_id'],
+                    name=values['poi_name'],
+                    category=values['poi_category'],
+                    latitude=values['poi_latitude'],
+                    longitude=values['poi_longitude'],
+                    ratings=average_csv_ratings(values['poi_ratings']),
                 )
-            except (ValueError, TypeError, KeyError, AttributeError) as e:
-                print(f"Skipping invalid CSV row {index}")
-                continue
-            except ValidationError as e:
-                print(f"Skipping invalid CSV row {index}")
-                continue
+            except (ValueError, ValidationError):
+                logger.warning('Skipping invalid CSV line %d', reader.line_num)
+
 
 @shared_task
 @transaction.atomic
