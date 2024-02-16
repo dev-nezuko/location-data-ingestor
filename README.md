@@ -60,14 +60,28 @@ After completing the task, please share the project via a git repository. The re
    cd search-smartly
    ```
 
-3. Install dependencies:
+3. Install virtual environment and activate it
+
+    ```bash
+   python -m venv env
+   ```
+
+   ```bash
+   source env/bin/activate
+   ```
+
+5. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Run database migrations:
+6. Run database migrations:
 
+   ```bash
+   python manage.py makemigrations
+   ```
+   
    ```bash
    python manage.py migrate
    ```
