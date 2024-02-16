@@ -21,8 +21,9 @@ class ProcessCSVChunkTests(TestCase):
             return process_csv_chunk.run(str(path))
 
     def test_valid_rows_are_imported_with_average_rating(self):
-        self.import_csv_text(CSV_HEADER + '1,Test POI 1,Category 1,10.0,20.0,"{5,4,3}"\n'
-                             '2,Test POI 2,Category 2,15.0,25.0,"{2,3,4}"\n')
+        self.import_csv_text(
+            CSV_HEADER + '1,Test POI 1,Category 1,10.0,20.0,"{5,4,3}"\n2,Test POI 2,Category 2,15.0,25.0,"{2,3,4}"\n'
+        )
         self.assertEqual(PointOfInterest.objects.count(), 2)
         first = PointOfInterest.objects.get(internal_id='1')
         self.assertEqual((first.name, first.latitude, first.longitude, first.ratings), ('Test POI 1', 10.0, 20.0, 4.0))
@@ -96,7 +97,10 @@ class ProcessStructuredFileTests(TestCase):
     def test_process_xml_file_with_valid_data(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'valid.xml'
-            path.write_text('<pois><poi><pid>1</pid><pname>Synthetic park</pname><pcategory>Park</pcategory><platitude>10</platitude><plongitude>20</plongitude><pratings>5,4,3</pratings></poi></pois>')
+            path.write_text(
+                '<pois><poi><pid>1</pid><pname>Synthetic park</pname><pcategory>Park</pcategory>'
+                '<platitude>10</platitude><plongitude>20</plongitude><pratings>5,4,3</pratings></poi></pois>'
+            )
             process_xml_file(str(path))
         point = PointOfInterest.objects.get(internal_id='1')
         self.assertEqual(point.name, 'Synthetic park')
@@ -105,10 +109,12 @@ class ProcessStructuredFileTests(TestCase):
     def test_xml_record_missing_a_tag_names_it_and_rolls_back(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'missing.xml'
-            path.write_text('<pois><poi><pid>1</pid><pname>Park</pname><pcategory>Park</pcategory>'
-                            '<platitude>10</platitude><plongitude>20</plongitude><pratings>4</pratings></poi>'
-                            '<poi><pid>2</pid><pname>Pier</pname><platitude>1</platitude>'
-                            '<plongitude>2</plongitude><pratings>3</pratings></poi></pois>')
+            path.write_text(
+                '<pois><poi><pid>1</pid><pname>Park</pname><pcategory>Park</pcategory>'
+                '<platitude>10</platitude><plongitude>20</plongitude><pratings>4</pratings></poi>'
+                '<poi><pid>2</pid><pname>Pier</pname><platitude>1</platitude>'
+                '<plongitude>2</plongitude><pratings>3</pratings></poi></pois>'
+            )
             with self.assertRaisesMessage(ValueError, 'XML record 2 has no <pcategory> value'):
                 process_xml_file.run(str(path))
         self.assertFalse(PointOfInterest.objects.exists())
@@ -118,10 +124,18 @@ class ImportCommandOutputTests(TestCase):
     def test_sync_import_reports_counts_per_file(self):
         output = StringIO()
         with self.assertLogs('poi.tasks', 'WARNING'):
-            call_command('import_poi', str(FIXTURES / 'valid_data.json'), str(FIXTURES / 'invalid_data.csv'),
-                         sync=True, stdout=output)
-        self.assertEqual(output.getvalue().splitlines(), [
-            'valid_data.json: 2 imported, 0 skipped',
-            'invalid_data.csv: 0 imported, 1 skipped',
-            '2 file(s) processed.',
-        ])
+            call_command(
+                'import_poi',
+                str(FIXTURES / 'valid_data.json'),
+                str(FIXTURES / 'invalid_data.csv'),
+                sync=True,
+                stdout=output,
+            )
+        self.assertEqual(
+            output.getvalue().splitlines(),
+            [
+                'valid_data.json: 2 imported, 0 skipped',
+                'invalid_data.csv: 0 imported, 1 skipped',
+                '2 file(s) processed.',
+            ],
+        )

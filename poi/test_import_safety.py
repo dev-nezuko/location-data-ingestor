@@ -2,15 +2,23 @@ import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
-from django.core.management import call_command, CommandError
+
+from django.core.management import CommandError, call_command
 from django.test import TestCase
-from poi.tasks import process_json_file, process_xml_file
+
 from poi.models import PointOfInterest
+from poi.tasks import process_json_file, process_xml_file
 
 
 class ImportSafetyTests(TestCase):
     def test_json_rolls_back_a_file_after_invalid_coordinates(self):
-        valid = {'id': 'one', 'name': 'Synthetic park', 'category': 'Park', 'coordinates': {'latitude': 10, 'longitude': 20}, 'ratings': [4, 5]}
+        valid = {
+            'id': 'one',
+            'name': 'Synthetic park',
+            'category': 'Park',
+            'coordinates': {'latitude': 10, 'longitude': 20},
+            'ratings': [4, 5],
+        }
         invalid = {**valid, 'id': 'two', 'coordinates': {'latitude': 100, 'longitude': 20}}
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'input.json'
@@ -20,7 +28,13 @@ class ImportSafetyTests(TestCase):
         self.assertEqual(PointOfInterest.objects.count(), 0)
 
     def test_nonfinite_rating_is_rejected(self):
-        value = {'id': 'one', 'name': 'Synthetic park', 'category': 'Park', 'coordinates': {'latitude': 10, 'longitude': 20}, 'ratings': [float('inf')]}
+        value = {
+            'id': 'one',
+            'name': 'Synthetic park',
+            'category': 'Park',
+            'coordinates': {'latitude': 10, 'longitude': 20},
+            'ratings': [float('inf')],
+        }
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'input.json'
             path.write_text(json.dumps([value]))
@@ -36,7 +50,8 @@ class ImportSafetyTests(TestCase):
                 process_xml_file.run(str(path))
 
     def test_command_rejects_all_inputs_before_queueing_any(self):
-        with tempfile.TemporaryDirectory() as directory, patch('poi.management.commands.import_poi.process_json_file.delay') as queue:
+        queue_json = patch('poi.management.commands.import_poi.process_json_file.delay')
+        with tempfile.TemporaryDirectory() as directory, queue_json as queue:
             path = Path(directory) / 'valid.json'
             path.write_text('[]')
             with self.assertRaises(CommandError):

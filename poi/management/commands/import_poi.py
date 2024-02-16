@@ -26,7 +26,7 @@ class Command(BaseCommand):
         for path, handler in jobs:
             if options['sync']:
                 counts = handler.run(str(path))
-                self.stdout.write(f"{path.name}: {counts['imported']} imported, {counts['skipped']} skipped")
+                self.stdout.write(f'{path.name}: {counts["imported"]} imported, {counts["skipped"]} skipped')
             else:
                 handler.delay(str(path))
         action = 'processed' if options['sync'] else 'submitted to Celery'

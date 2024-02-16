@@ -59,14 +59,16 @@ def process_csv_chunk(file_path):
         for row in reader:
             values = {field: (row.get(field) or '').strip() for field in CSV_FIELDS}
             try:
-                pending.append(build_poi(
-                    internal_id=values['poi_id'],
-                    name=values['poi_name'],
-                    category=values['poi_category'],
-                    latitude=values['poi_latitude'],
-                    longitude=values['poi_longitude'],
-                    ratings=average_csv_ratings(values['poi_ratings']),
-                ))
+                pending.append(
+                    build_poi(
+                        internal_id=values['poi_id'],
+                        name=values['poi_name'],
+                        category=values['poi_category'],
+                        latitude=values['poi_latitude'],
+                        longitude=values['poi_longitude'],
+                        ratings=average_csv_ratings(values['poi_ratings']),
+                    )
+                )
             except (ValueError, ValidationError):
                 skipped += 1
                 logger.warning('Skipping invalid CSV line %d', reader.line_num)
@@ -86,14 +88,16 @@ def process_json_file(file_path):
     points = []
     for item in data:
         ratings = sum(item['ratings']) / len(item['ratings']) if item['ratings'] else 0
-        points.append(build_poi(
-            internal_id=item['id'],
-            name=item['name'],
-            latitude=item['coordinates']['latitude'],
-            longitude=item['coordinates']['longitude'],
-            category=item['category'],
-            ratings=ratings,
-        ))
+        points.append(
+            build_poi(
+                internal_id=item['id'],
+                name=item['name'],
+                latitude=item['coordinates']['latitude'],
+                longitude=item['coordinates']['longitude'],
+                category=item['category'],
+                ratings=ratings,
+            )
+        )
     return {'imported': save_points(points), 'skipped': 0}
 
 
@@ -115,12 +119,14 @@ def process_xml_file(file_path):
     points = []
     for position, element in enumerate(ET.fromstring(content), start=1):
         ratings = [float(rating) for rating in xml_text(element, 'pratings', position).split(',')]
-        points.append(build_poi(
-            internal_id=xml_text(element, 'pid', position),
-            name=xml_text(element, 'pname', position),
-            latitude=xml_text(element, 'platitude', position),
-            longitude=xml_text(element, 'plongitude', position),
-            category=xml_text(element, 'pcategory', position),
-            ratings=sum(ratings) / len(ratings),
-        ))
+        points.append(
+            build_poi(
+                internal_id=xml_text(element, 'pid', position),
+                name=xml_text(element, 'pname', position),
+                latitude=xml_text(element, 'platitude', position),
+                longitude=xml_text(element, 'plongitude', position),
+                category=xml_text(element, 'pcategory', position),
+                ratings=sum(ratings) / len(ratings),
+            )
+        )
     return {'imported': save_points(points), 'skipped': 0}
