@@ -8,4 +8,9 @@ staticfiles/
 # Virtual environment
 env
 
+#__pyache__
+poi/__pyache__
+SearchSmartly/__pyache__
+poi/models/__pyache__
+poi/management/commands/__pyache__
 
