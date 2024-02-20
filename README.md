@@ -88,19 +88,32 @@ After completing the task, please share the project via a git repository. The re
 
 ### Usage
 
-1. Import PoI data from files using the management command:
+1. Start Celery:
+   ```bash
+   celery -A SearchSmartly worker --loglevel=info
+   ```
+     
+2. Import PoI data from files using the management command:
 
    ```bash
-   python manage.py import_poi <file_path>
+   python3 manage.py import_poi <file_path>
    ```
 
-2. Access the Django Admin Panel to browse and search PoI data:
+3. Access the Django Admin Panel to browse and search PoI data:
 
    ```bash
-   python manage.py runserver
+   python3 manage.py runserver
    ```
 
    Visit http://localhost:8000/admin/ in your web browser.
+
+### Usage
+
+Test Cases:
+```bash
+python3 manage.py test poi.tests
+```
+
 
 ### Looks Like
  <img width="1619" alt="image" src="https://github.com/dev-nezuko/location-data-ingestor/assets/119432487/d7c79baa-166b-4d89-8267-7a69c755aa78">
