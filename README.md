@@ -11,6 +11,12 @@ Search Smartly is a Django web application designed to process and import Point 
 - Python 3.10 or above
 - Django
 
+### Prerequisites
+  ```bash
+   1- celery==5.1.2
+   2- pandas==2.2.0
+   3- RabbitMQ (It is being used as a Message Broker)
+   ```
 ### Installation
 
 1. Clone the repository:
