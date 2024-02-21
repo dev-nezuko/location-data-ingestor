@@ -1,9 +1,28 @@
-from celery import shared_task
-import json
-import pandas as pd
-import xml.etree.ElementTree as ET
-from django.core.exceptions import ValidationError
+"""
+This module defines tasks for processing and importing geographical point of interest (POI) data 
+into the PointOfInterest model from various file formats including CSV, JSON, and XML. 
+Each task is designed to handle a specific data format, ensuring data is correctly
+parsed, validated, and stored in the database. The tasks can be executed asynchronously
+using Celery, allowing for efficient processing of large datasets without blocking the 
+application's main execution flow.
 
+Methods:
+- process_csv_chunk(file_path): Processes a CSV file in chunks, importing each row into the 
+PointOfInterest model after validation.
+- process_json_file(file_path): Reads and imports data from a JSON file into the 
+PointOfInterest model, calculating average ratings where applicable.
+- process_xml_file(file_path): Parses an XML file and imports its contents into the 
+PointOfInterest model, including calculation of average ratings.
+
+Each method includes error handling to gracefully manage invalid data and exceptions,
+ensuring the integrity of the database.
+"""
+
+import json
+import xml.etree.ElementTree as ET
+from celery import shared_task
+import pandas as pd
+from django.core.exceptions import ValidationError
 from .models import PointOfInterest
 
 @shared_task
