@@ -4,14 +4,15 @@
 
 Search Smartly is a Django web application designed to process and import Point of Interest (PoI) data from various file formats (CSV, JSON, XML) into a local database. The application allows users to browse PoI information via the Django Admin Panel and search for PoIs by internal or external ID, with an additional filter by category.
 
-### Dependencies
 
+### Prerequisites
 - Python 3.10 or above
 - Django
 
 ## Installation and Usage
 
-### Prerequisites
+
+### Dependencies
   ```bash
    1- celery==5.1.2
    2- pandas==2.2.0
