@@ -17,9 +17,6 @@ The distributed nature of Celery allows for horizontal scaling by adding more wo
 ### Reliability and Fault Tolerance
 With Celery, we gained robust error handling mechanisms, including automatic task retries and result storage. This reliability ensures that temporary disruptions do not result in data loss or inconsistencies, maintaining the integrity of our data processing pipeline.
 
-### Task Management and Monitoring
-Utilizing tools like Flower for Celery, we achieved unparalleled visibility into our task queue. This monitoring capability enables us to track task execution in real-time, identify bottlenecks, and quickly address any issues that arise.
-
 ### Integration with Django
 Celery's seamless compatibility with Django's ORM and database connections significantly streamlined the implementation process. This integration allowed us to leverage Django's features effectively while adding powerful asynchronous task processing capabilities to our application.
 
