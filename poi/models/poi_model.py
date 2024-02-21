@@ -6,7 +6,7 @@ from django.db import models
 
 class PointOfInterest(models.Model):
     '''
-    Model hold the data entries for point of sale
+    A point of interest with imported coordinates and average rating.
     '''
     external_id = models.AutoField(primary_key=True)
     internal_id = models.CharField(max_length=100)

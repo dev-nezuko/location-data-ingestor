@@ -214,39 +214,22 @@ class ProcessCSVChunkTests(TestCase):
 
         self.assertEqual(PointOfInterest.objects.count(), 0)
 
-    @patch('xml.etree.ElementTree.parse')
-    def test_process_xml_file_with_valid_data(self, mock_et_parse):
-        """
-        Assesses the `process_xml_file` task's capability to parse correctly formatted
-        XML files and create corresponding PointOfInterest objects in the database.
-        This test uses mocking to simulate XML parsing, bypassing file I/O and
-        focusing on the data handling logic. It ensures that PointOfInterest objects
-        are created with attributes that accurately reflect the content of the
-        simulated XML data.
-        """
-        poi1 = MagicMock()
-        poi1.find.side_effect = [
-            MagicMock(text="1"), MagicMock(text="POI 1"), MagicMock(text="Category 1"),
-            MagicMock(text="10.0"), MagicMock(text="20.0"), MagicMock(text="5,4,3")
-        ]
-        poi2 = MagicMock()
-        poi2.find.side_effect = [
-            MagicMock(text="2"), MagicMock(text="POI 2"), MagicMock(text="Category 2"),
-            MagicMock(text="15.0"), MagicMock(text="25.0"), MagicMock(text="2,3,4")
-        ]
-        mock_et_parse.return_value.getroot.return_value = [poi1, poi2]
+    def test_process_xml_file_with_valid_data(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'valid.xml'
+            path.write_text('<pois><poi><pid>1</pid><pname>Synthetic park</pname><pcategory>Park</pcategory><platitude>10</platitude><plongitude>20</plongitude><pratings>5,4,3</pratings></poi></pois>')
+            process_xml_file(str(path))
+        point = PointOfInterest.objects.get(internal_id='1')
+        self.assertEqual(point.name, 'Synthetic park')
+        self.assertEqual(point.ratings, 4)
 
-        process_xml_file('test_files/valid_data.xml')
-
-        self.assertEqual(PointOfInterest.objects.count(), 2)
-
-    @patch('xml.etree.ElementTree.parse')
-    def test_process_xml_file_with_empty_data(self, mock_et_parse):
-        """
-        Test that the process_xml_file task correctly handles an empty XML file,
-        ensuring no PointOfInterest objects are created in the database.
-        """
-        # Setup the mock to return an empty list for the XML root's children
-        mock_et_parse.return_value.getroot.return_value = []
-        process_xml_file('test_files/empty_data.xml')
+    def test_process_xml_file_with_empty_data(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'empty.xml'
+            path.write_text('<pois/>')
+            process_xml_file(str(path))
         self.assertEqual(PointOfInterest.objects.count(), 0)

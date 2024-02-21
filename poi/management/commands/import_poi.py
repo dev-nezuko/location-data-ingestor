@@ -1,42 +1,29 @@
-from django.core.management.base import BaseCommand
+from pathlib import Path
+from django.core.management.base import BaseCommand, CommandError
 from poi.tasks import process_csv_chunk, process_json_file, process_xml_file
 
+
 class Command(BaseCommand):
-    """
-    A Django management command to import Point of Interest (PoI) data from CSV, JSON, and XML files.
-
-    This command reads files specified as command line arguments and enqueues tasks to process each file
-    according to its format. Supported file formats are CSV, JSON, and XML.
-    """
-
-    help = 'Import PoI data from CSV, JSON, and XML files.'
+    help = 'Import local CSV, JSON or XML POI files, via Celery or --sync.'
 
     def add_arguments(self, parser):
-        """
-        Adds command-line arguments to the command.
-
-        Args:
-            parser: The command line argument parser instance.
-        """
-        parser.add_argument('files', nargs='+', type=str, help='List of file paths to import.')
+        parser.add_argument('files', nargs='+')
+        parser.add_argument('--sync', action='store_true', help='Process immediately without a broker')
 
     def handle(self, *args, **options):
-        """
-        Handles the command execution.
-
-        Iterates over each file path provided as an argument and enqueues a corresponding task
-        based on the file's extension.
-
-        Args:
-            *args: Variable length argument list.
-            **options: Arbitrary keyword arguments.
-        """
-        for file_path in options['files']:
-            if file_path.endswith('.csv'):
-                process_csv_chunk.delay(file_path)
-            elif file_path.endswith('.json'):
-                process_json_file.delay(file_path)
-            elif file_path.endswith('.xml'):
-                process_xml_file.delay(file_path)
-
-        self.stdout.write(self.style.SUCCESS('All files have been queued for import.'))
+        handlers = {'.csv': process_csv_chunk, '.json': process_json_file, '.xml': process_xml_file}
+        jobs = []
+        for value in options['files']:
+            path = Path(value).expanduser().resolve()
+            if path.suffix.lower() not in handlers or not path.is_file():
+                raise CommandError('Every input must be an existing CSV, JSON or XML file')
+            if path.stat().st_size > 32 * 1024 * 1024:
+                raise CommandError('Input files must be at most 32 MiB')
+            jobs.append((str(path), handlers[path.suffix.lower()]))
+        for path, handler in jobs:
+            if options['sync']:
+                handler.run(path)
+            else:
+                handler.delay(path)
+        action = 'processed' if options['sync'] else 'submitted to Celery'
+        self.stdout.write(self.style.SUCCESS(f'{len(jobs)} file(s) {action}.'))

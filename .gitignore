@@ -13,3 +13,7 @@ poi/__pyache__
 SearchSmartly/__pyache__
 poi/models/__pyache__
 poi/management/commands/__pyache__
+
+.env
+*.sqlite3
+__pycache__/
